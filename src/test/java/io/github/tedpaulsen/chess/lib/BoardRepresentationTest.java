@@ -10,7 +10,13 @@ public class BoardRepresentationTest {
 
     @BeforeEach
     public void setup() {
-        board = new BoardRepresentation();
+        board = BoardRepresentation.initial();
+    }
+
+    @Test
+    public void testFromFen() {
+        var fenBoard = BoardRepresentation.fromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        Assertions.assertEquals(BoardRepresentation.initial(), fenBoard);
     }
 
     @Test

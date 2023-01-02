@@ -34,6 +34,22 @@ public class BitBoard {
         return new BitBoard(value & ~Masks.H_FILE);
     }
 
+    public BitBoard rank2() {
+        return new BitBoard(value & Masks.RANK_2);
+    }
+
+    public BitBoard rank7() {
+        return new BitBoard(value & Masks.RANK_7);
+    }
+
+    public BitBoard mask(BitBoard b) {
+        return new BitBoard(value & b.value);
+    }
+
+    public BitBoard mask(long m) {
+        return new BitBoard(value & m);
+    }
+
     /**
      * Expands this BitBoard to a list of singleton bitboards.
      * e.g. 001      000   001

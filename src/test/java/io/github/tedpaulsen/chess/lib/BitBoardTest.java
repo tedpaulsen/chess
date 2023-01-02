@@ -28,7 +28,7 @@ public class BitBoardTest {
                 new BitBoard(0b00000000_00000000_00000000_00000000_00000000_00000000_00000010_00000000L),
                 new BitBoard(0b00000000_00000000_00000000_00000000_00000000_00000000_00000001_00000000L)
             ),
-            new BoardRepresentation().getWhitePawns().toSingletons()
+            BoardRepresentation.initial().getWhitePawns().toSingletons()
         );
     }
 
