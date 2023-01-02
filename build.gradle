@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'io.freefair.lombok' version '6.6.1'
+    id 'com.diffplug.spotless' version '6.12.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+spotless {
+    java {
+        target 'src/**/*.java'
+        endWithNewline()
+        importOrder()
+        removeUnusedImports()
+        toggleOffOn()
+        formatAnnotations()
+        trimTrailingWhitespace()
+        prettier(['prettier': '2.3.1', 'prettier-plugin-java': '1.6.1']).config(['parser': 'java', 'tabWidth': 4, 'printWidth': 120, 'useTabs': false])
+    }
+}
