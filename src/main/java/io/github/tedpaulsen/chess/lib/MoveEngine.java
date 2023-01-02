@@ -109,77 +109,143 @@ public class MoveEngine {
 
         for (BitBoard bishop : bishops.toSingletons()) {
             // NE
-            long loc = bishop.getValue();
-            do {
-                loc = loc << 9;
-
-                if (friendlyPieces.mask(loc).getValue() != 0) {
-                    // we've found a friendly piece along the ray
+            BitBoard target = bishop.notHFile().notRank8().shiftLeft(9).mask(~friendlyPieces.getValue());
+            while (!target.empty()) {
+                moves.add(new Move(piece, bishop, target));
+                if (!enemyPieces.mask(target).empty()) {
+                    // we've hit an enemy piece, break here
                     break;
-                } else if (enemyPieces.mask(loc).getValue() != 0) {
-                    // we've found an enemy piece we can capture
-                    moves.add(new Move(piece, bishop, new BitBoard(loc)));
-                    break;
-                } else {
-                    // a silent move
-                    // TODO: add some flag to denote a silent move vs a capture
-                    moves.add(new Move(piece, bishop, new BitBoard(loc)));
                 }
-            } while ((loc & Masks.RANK_8) == 0 && (loc & Masks.H_FILE) == 0);
+                // mask h file and rank 8 to ensure we don't wrap around, then slide NE, then mask friendly pieces
+                target = target.notHFile().notRank8().shiftLeft(9).mask(~friendlyPieces.getValue());
+            }
             // NW
-            loc = bishop.getValue();
-            do {
-                loc = loc << 7;
-
-                if (friendlyPieces.mask(loc).getValue() != 0) {
-                    // we've found a friendly piece along the ray
+            target = bishop.notAFile().notRank8().shiftLeft(7).mask(~friendlyPieces.getValue());
+            while (!target.empty()) {
+                moves.add(new Move(piece, bishop, target));
+                if (!enemyPieces.mask(target).empty()) {
+                    // we've hit an enemy piece, break here
                     break;
-                } else if (enemyPieces.mask(loc).getValue() != 0) {
-                    // we've found an enemy piece we can capture
-                    moves.add(new Move(piece, bishop, new BitBoard(loc)));
-                    break;
-                } else {
-                    // a silent move
-                    // TODO: add some flag to denote a silent move vs a capture
-                    moves.add(new Move(piece, bishop, new BitBoard(loc)));
                 }
-            } while ((loc & Masks.RANK_8) == 0 && (loc & Masks.A_FILE) == 0);
+                // mask a file and rank 8 to ensure we don't wrap around, then slide NW, then mask friendly pieces
+                target = target.notAFile().notRank8().shiftLeft(7).mask(~friendlyPieces.getValue());
+            }
             // SE
-            loc = bishop.getValue();
-            do {
-                loc = loc >> 7;
-
-                if (friendlyPieces.mask(loc).getValue() != 0) {
-                    // we've found a friendly piece along the ray
+            target = bishop.notHFile().notRank1().shiftRight(7).mask(~friendlyPieces.getValue());
+            while (!target.empty()) {
+                moves.add(new Move(piece, bishop, target));
+                if (!enemyPieces.mask(target).empty()) {
+                    // we've hit an enemy piece, break here
                     break;
-                } else if (enemyPieces.mask(loc).getValue() != 0) {
-                    // we've found an enemy piece we can capture
-                    moves.add(new Move(piece, bishop, new BitBoard(loc)));
-                    break;
-                } else {
-                    // a silent move
-                    // TODO: add some flag to denote a silent move vs a capture
-                    moves.add(new Move(piece, bishop, new BitBoard(loc)));
                 }
-            } while ((loc & Masks.RANK_1) == 0 && (loc & Masks.H_FILE) == 0);
+                // mask h file and rank 1 to ensure we don't wrap around, then slide SE, then mask friendly pieces
+                target = target.notHFile().notRank1().shiftRight(7).mask(~friendlyPieces.getValue());
+            }
             // SW
-            loc = bishop.getValue();
-            do {
-                loc = loc >> 9;
+            target = bishop.notAFile().notRank1().shiftRight(9).mask(~friendlyPieces.getValue());
+            while (!target.empty()) {
+                moves.add(new Move(piece, bishop, target));
+                if (!enemyPieces.mask(target).empty()) {
+                    // we've hit an enemy piece, break here
+                    break;
+                }
+                // mask h file and rank 1 to ensure we don't wrap around, then slide SE, then mask friendly pieces
+                target = target.notAFile().notRank1().shiftRight(9).mask(~friendlyPieces.getValue());
+            }
+        }
 
-                if (friendlyPieces.mask(loc).getValue() != 0) {
+        return moves;
+    }
+
+    public List<Move> generateRookMoves(Side side, BoardRepresentation board) {
+        List<Move> moves = new ArrayList<>();
+
+        char piece = side.is(Side.WHITE) ? 'R' : 'r';
+        BitBoard rooks = side.is(Side.WHITE) ? board.getWhiteRooks() : board.getBlackRooks();
+        BitBoard enemyPieces = side.is(Side.WHITE) ? board.getBlackPieces() : board.getWhitePieces();
+
+        for (BitBoard rook : rooks.toSingletons()) {
+            BitBoard friendlyPieces =
+                (side.is(Side.WHITE) ? board.getWhitePieces() : board.getBlackPieces()).mask(~rooks.getValue());
+            //N
+            long loc = rook.getValue();
+            do {
+                loc = loc << 8;
+                if (loc == 0) {
+                    // off the board
+                    break;
+                } else if (friendlyPieces.mask(loc).getValue() != 0) {
                     // we've found a friendly piece along the ray
                     break;
                 } else if (enemyPieces.mask(loc).getValue() != 0) {
                     // we've found an enemy piece we can capture
-                    moves.add(new Move(piece, bishop, new BitBoard(loc)));
-                    break;
+                    moves.add(new Move(piece, rook, new BitBoard(loc)));
                 } else {
                     // a silent move
                     // TODO: add some flag to denote a silent move vs a capture
-                    moves.add(new Move(piece, bishop, new BitBoard(loc)));
+                    moves.add((new Move(piece, rook, new BitBoard(loc))));
                 }
-            } while ((loc & Masks.RANK_1) == 0 && (loc & Masks.A_FILE) == 0);
+            } while ((loc & Masks.RANK_8) == 0);
+
+            // E
+            loc = rook.getValue();
+            do {
+                loc = loc << 1;
+                if (loc == 0) {
+                    // off the board
+                    break;
+                } else if (friendlyPieces.mask(loc).getValue() != 0) {
+                    // we've found a friendly piece along the ray
+                    break;
+                } else if (enemyPieces.mask(loc).getValue() != 0) {
+                    // we've found an enemy piece we can capture
+                    moves.add(new Move(piece, rook, new BitBoard(loc)));
+                } else {
+                    // a silent move
+                    // TODO: add some flag to denote a silent move vs a capture
+                    moves.add((new Move(piece, rook, new BitBoard(loc))));
+                }
+            } while ((loc & Masks.H_FILE) == 0);
+
+            // S
+            loc = rook.getValue();
+            do {
+                loc = loc >> 8;
+                if (loc == 0) {
+                    // off the board
+                    break;
+                } else if (friendlyPieces.mask(loc).getValue() != 0) {
+                    // we've found a friendly piece along the ray
+                    break;
+                } else if (enemyPieces.mask(loc).getValue() != 0) {
+                    // we've found an enemy piece we can capture
+                    moves.add(new Move(piece, rook, new BitBoard(loc)));
+                } else {
+                    // a silent move
+                    // TODO: add some flag to denote a silent move vs a capture
+                    moves.add((new Move(piece, rook, new BitBoard(loc))));
+                }
+            } while ((loc & Masks.RANK_1) == 0);
+
+            // W
+            loc = rook.getValue();
+            do {
+                loc = loc >> 1;
+                if (loc == 0) {
+                    // off the board
+                    break;
+                } else if (friendlyPieces.mask(loc).getValue() != 0) {
+                    // we've found a friendly piece along the ray
+                    break;
+                } else if (enemyPieces.mask(loc).getValue() != 0) {
+                    // we've found an enemy piece we can capture
+                    moves.add(new Move(piece, rook, new BitBoard(loc)));
+                } else {
+                    // a silent move
+                    // TODO: add some flag to denote a silent move vs a capture
+                    moves.add((new Move(piece, rook, new BitBoard(loc))));
+                }
+            } while ((loc & Masks.A_FILE) == 0);
         }
 
         return moves;

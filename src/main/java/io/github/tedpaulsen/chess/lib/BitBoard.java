@@ -2,6 +2,7 @@ package io.github.tedpaulsen.chess.lib;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 
@@ -10,12 +11,16 @@ public class BitBoard {
 
     long value;
 
+    public boolean empty() {
+        return value == 0;
+    }
+
     public BitBoard shiftLeft(int leftShift) {
         return new BitBoard(value << leftShift);
     }
 
     public BitBoard shiftRight(int rightShift) {
-        return new BitBoard(value >> rightShift);
+        return new BitBoard(value >>> rightShift);
     }
 
     public BitBoard notAFile() {
@@ -42,6 +47,14 @@ public class BitBoard {
         return new BitBoard(value & Masks.RANK_7);
     }
 
+    public BitBoard notRank1() {
+        return new BitBoard(value & ~Masks.RANK_1);
+    }
+
+    public BitBoard notRank8() {
+        return new BitBoard(value & ~Masks.RANK_8);
+    }
+
     public BitBoard mask(BitBoard b) {
         return new BitBoard(value & b.value);
     }
@@ -57,6 +70,10 @@ public class BitBoard {
      *      000      000   000
      */
     public Collection<BitBoard> toSingletons() {
+        if (isSingleton()) {
+            return Set.of(new BitBoard(value));
+        }
+
         long v = value;
         int pow = 0;
         Collection<BitBoard> c = new HashSet<>();

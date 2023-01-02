@@ -18,6 +18,11 @@ public class BitBoardTest {
         );
 
         Assertions.assertEquals(
+            Set.of(new BitBoard(-9223372036854775808L)),
+            new BitBoard(-9223372036854775808L).toSingletons()
+        );
+
+        Assertions.assertEquals(
             Set.of(
                 new BitBoard(0b00000000_00000000_00000000_00000000_00000000_00000000_10000000_00000000L),
                 new BitBoard(0b00000000_00000000_00000000_00000000_00000000_00000000_01000000_00000000L),
