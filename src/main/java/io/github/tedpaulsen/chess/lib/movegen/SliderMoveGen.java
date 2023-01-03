@@ -28,4 +28,22 @@ public abstract class SliderMoveGen {
 
         return moves;
     }
+
+    public List<Function<BitBoard, BitBoard>> diagonalTransforms(BitBoard friendlyPieces) {
+        return List.of(
+            b -> b.notHFile().notRank8().shiftLeft(9).mask(~friendlyPieces.getValue()),
+            b -> b.notAFile().notRank8().shiftLeft(7).mask(~friendlyPieces.getValue()),
+            b -> b.notHFile().notRank1().shiftRight(7).mask(~friendlyPieces.getValue()),
+            b -> b.notAFile().notRank1().shiftRight(9).mask(~friendlyPieces.getValue())
+        );
+    }
+
+    public List<Function<BitBoard, BitBoard>> verticalAndHorizontalTransforms(BitBoard friendlyPieces) {
+        return List.of(
+            b -> b.notRank8().shiftLeft(8).mask(~friendlyPieces.getValue()),
+            b -> b.notHFile().shiftLeft(1).mask(~friendlyPieces.getValue()),
+            b -> b.notRank1().shiftRight(8).mask(~friendlyPieces.getValue()),
+            b -> b.notAFile().shiftRight(1).mask(~friendlyPieces.getValue())
+        );
+    }
 }

@@ -10,27 +10,27 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class RookMoveGen extends SliderMoveGen implements MoveGen {
+public class QueenMoveGen extends SliderMoveGen implements MoveGen {
 
     @Override
     public List<Move> generateMoves(Side side, BoardRepresentation board) {
         List<Move> moves = new ArrayList<>();
 
-        char piece = side.is(Side.WHITE) ? 'R' : 'r';
-        BitBoard rooks = side.is(Side.WHITE) ? board.getWhiteRooks() : board.getBlackRooks();
+        char piece = side.is(Side.WHITE) ? 'Q' : 'q';
+        BitBoard queens = side.is(Side.WHITE) ? board.getWhiteQueens() : board.getBlackQueens();
         BitBoard enemyPieces = side.is(Side.WHITE) ? board.getBlackPieces() : board.getWhitePieces();
 
-        for (BitBoard rook : rooks.toSingletons()) {
+        for (BitBoard queen : queens.toSingletons()) {
             BitBoard friendlyPieces =
-                (side.is(Side.WHITE) ? board.getWhitePieces() : board.getBlackPieces()).mask(~rook.getValue());
+                (side.is(Side.WHITE) ? board.getWhitePieces() : board.getBlackPieces()).mask(~queen.getValue());
 
             Stream<Function<BitBoard, BitBoard>> transforms = Stream
-                .of(verticalAndHorizontalTransforms(friendlyPieces))
+                .of(verticalAndHorizontalTransforms(friendlyPieces), diagonalTransforms(friendlyPieces))
                 .flatMap(Collection::stream);
 
             moves.addAll(
                 transforms
-                    .map(transform -> generateMovesFromTransform(piece, rook, transform, enemyPieces))
+                    .map(transform -> generateMovesFromTransform(piece, queen, transform, enemyPieces))
                     .flatMap(Collection::stream)
                     .toList()
             );

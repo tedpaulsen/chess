@@ -5,7 +5,10 @@ import io.github.tedpaulsen.chess.lib.BoardRepresentation;
 import io.github.tedpaulsen.chess.lib.Move;
 import io.github.tedpaulsen.chess.lib.Side;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class BishopMoveGen extends SliderMoveGen implements MoveGen {
 
@@ -15,46 +18,21 @@ public class BishopMoveGen extends SliderMoveGen implements MoveGen {
 
         char piece = side.is(Side.WHITE) ? 'B' : 'b';
         BitBoard bishops = side.is(Side.WHITE) ? board.getWhiteBishops() : board.getBlackBishops();
-        BitBoard friendlyPieces =
-            (side.is(Side.WHITE) ? board.getWhitePieces() : board.getBlackPieces()).mask(~bishops.getValue());
         BitBoard enemyPieces = side.is(Side.WHITE) ? board.getBlackPieces() : board.getWhitePieces();
 
         for (BitBoard bishop : bishops.toSingletons()) {
-            // NE
+            BitBoard friendlyPieces =
+                (side.is(Side.WHITE) ? board.getWhitePieces() : board.getBlackPieces()).mask(~bishop.getValue());
+
+            Stream<Function<BitBoard, BitBoard>> transforms = Stream
+                .of(diagonalTransforms(friendlyPieces))
+                .flatMap(Collection::stream);
+
             moves.addAll(
-                generateMovesFromTransform(
-                    piece,
-                    bishop,
-                    b -> b.notHFile().notRank8().shiftLeft(9).mask(~friendlyPieces.getValue()),
-                    enemyPieces
-                )
-            );
-            // NW
-            moves.addAll(
-                generateMovesFromTransform(
-                    piece,
-                    bishop,
-                    b -> b.notAFile().notRank8().shiftLeft(7).mask(~friendlyPieces.getValue()),
-                    enemyPieces
-                )
-            );
-            // SE
-            moves.addAll(
-                generateMovesFromTransform(
-                    piece,
-                    bishop,
-                    b -> b.notHFile().notRank1().shiftRight(7).mask(~friendlyPieces.getValue()),
-                    enemyPieces
-                )
-            );
-            // SW
-            moves.addAll(
-                generateMovesFromTransform(
-                    piece,
-                    bishop,
-                    b -> b.notAFile().notRank1().shiftRight(9).mask(~friendlyPieces.getValue()),
-                    enemyPieces
-                )
+                transforms
+                    .map(transform -> generateMovesFromTransform(piece, bishop, transform, enemyPieces))
+                    .flatMap(Collection::stream)
+                    .toList()
             );
         }
 
