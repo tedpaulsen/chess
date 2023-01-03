@@ -54,50 +54,6 @@ public class MoveEngine {
         return moves;
     }
 
-    public List<Move> generatePawnMoves(Side side, BoardRepresentation board) {
-        List<Move> moves = new ArrayList<>();
-
-        char pieceCode = side.is(Side.WHITE) ? 'P' : 'p';
-        BitBoard friendlyPieces = side.is(Side.WHITE) ? board.getWhitePieces() : board.getBlackPieces();
-        BitBoard enemyPieces = side.is(Side.WHITE) ? board.getBlackPieces() : board.getWhitePieces();
-        BitBoard empties = new BitBoard(~friendlyPieces.getValue() | ~enemyPieces.getValue());
-        BitBoard pawns = side.is(Side.WHITE) ? board.getWhitePawns() : board.getBlackPawns();
-
-        for (BitBoard pawn : pawns.toSingletons()) {
-            if (side.is(Side.WHITE)) {
-                // advance
-                addIfValid(moves, friendlyPieces, new Move(pieceCode, pawn, pawn.shiftLeft(8).mask(empties)));
-                // left capture
-                addIfValid(moves, friendlyPieces, new Move(pieceCode, pawn, pawn.notAFile().shiftLeft(7)));
-                // right capture
-                addIfValid(moves, friendlyPieces, new Move(pieceCode, pawn, pawn.notHFile().shiftLeft(9)));
-                // double advance
-                addIfValid(
-                    moves,
-                    friendlyPieces,
-                    new Move(pieceCode, pawn, pawn.rank2().shiftLeft(8).mask(empties).shiftLeft(8).mask(empties))
-                );
-                // TODO: en-passant capture
-            } else {
-                // advance
-                addIfValid(moves, friendlyPieces, new Move(pieceCode, pawn, pawn.shiftRight(8).mask(empties)));
-                // left capture
-                addIfValid(moves, friendlyPieces, new Move(pieceCode, pawn, pawn.notAFile().shiftRight(7)));
-                // right capture
-                addIfValid(moves, friendlyPieces, new Move(pieceCode, pawn, pawn.notHFile().shiftRight(9)));
-                // double advance
-                addIfValid(
-                    moves,
-                    friendlyPieces,
-                    new Move(pieceCode, pawn, pawn.rank7().shiftRight(8).mask(empties).shiftRight(8).mask(empties))
-                );
-                // TODO: en-passant capture
-            }
-        }
-
-        return moves;
-    }
-
     public void addIfValid(Collection<Move> moves, BitBoard friendlyPieces, Move toAdd) {
         // mask friendly pieces
         toAdd = new Move(toAdd.getPiece(), toAdd.getFrom(), toAdd.getTo().mask(~friendlyPieces.getValue()));

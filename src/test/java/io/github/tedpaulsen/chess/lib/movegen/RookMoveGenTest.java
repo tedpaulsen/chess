@@ -1,9 +1,12 @@
-package io.github.tedpaulsen.chess.lib;
+package io.github.tedpaulsen.chess.lib.movegen;
 
+import io.github.tedpaulsen.chess.lib.BoardRepresentation;
+import io.github.tedpaulsen.chess.lib.Side;
+import io.github.tedpaulsen.chess.lib.TestBase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class RookMovesTest extends TestBase {
+public class RookMoveGenTest extends TestBase {
 
     @Test
     public void testRookMoves() {

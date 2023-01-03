@@ -1,9 +1,12 @@
-package io.github.tedpaulsen.chess.lib;
+package io.github.tedpaulsen.chess.lib.movegen;
 
+import io.github.tedpaulsen.chess.lib.BoardRepresentation;
+import io.github.tedpaulsen.chess.lib.Side;
+import io.github.tedpaulsen.chess.lib.TestBase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class BishopMovesTest extends TestBase {
+public class BishopMoveGenTest extends TestBase {
 
     @Test
     public void testBishopWithFriendlyAndEnemyPieces() {
