@@ -22,7 +22,7 @@ public class PawnMoveGen implements MoveGen {
         for (BitBoard pawn : pawns.toSingletons()) {
             if (side.is(Side.WHITE)) {
                 // advance
-                moves.add(new Move(pieceCode, pawn, pawn.shiftLeft(8).mask(empties).mask(empties)));
+                moves.add(new Move(pieceCode, pawn, pawn.shiftLeft(8).mask(empties)));
                 // left capture
                 moves.add(new Move(pieceCode, pawn, pawn.notAFile().shiftLeft(7).mask(enemyPieces)));
                 // right capture

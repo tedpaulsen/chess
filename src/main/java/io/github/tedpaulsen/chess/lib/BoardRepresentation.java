@@ -69,6 +69,10 @@ public class BoardRepresentation {
         );
     }
 
+    public BitBoard getEmpties() {
+        return new BitBoard(~getBlackPieces().getValue() & ~getWhitePieces().getValue());
+    }
+
     public static BoardRepresentation initial() {
         // spotless:off
         BitBoard whitePawns   = new BitBoard(0b00000000_00000000_00000000_00000000_00000000_00000000_11111111_00000000L);

@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 public abstract class SliderMoveGen {
 
-    List<Move> generateMovesFromTransform(
+    public List<Move> generateMovesFromTransform(
         char piece,
         BitBoard startingLocation,
         Function<BitBoard, BitBoard> transform,
@@ -23,7 +23,6 @@ public abstract class SliderMoveGen {
                 // we've hit an enemy piece, break here
                 break;
             }
-            // mask a file and rank 8 to ensure we don't wrap around, then slide NW, then mask friendly pieces
             move = transform.apply(move);
         }
 
