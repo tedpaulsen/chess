@@ -17,9 +17,9 @@ public abstract class SliderMoveGen {
         List<Move> moves = new ArrayList<>();
         BitBoard move = transform.apply(startingLocation);
 
-        while (!move.empty()) {
+        while (!move.isEmpty()) {
             moves.add(new Move(piece, startingLocation, move));
-            if (!enemyPieces.mask(move).empty()) {
+            if (!enemyPieces.mask(move).isEmpty()) {
                 // we've hit an enemy piece, break here
                 break;
             }
@@ -27,6 +27,26 @@ public abstract class SliderMoveGen {
         }
 
         return moves;
+    }
+
+    public BitBoard generateTargetSquaresFromTransform(
+        BitBoard startingLocation,
+        Function<BitBoard, BitBoard> transform,
+        BitBoard enemyPieces
+    ) {
+        BitBoard dest = transform.apply(startingLocation);
+        BitBoard acc = new BitBoard(0L);
+
+        while (!dest.isEmpty()) {
+            acc = acc.union(dest);
+            if (!enemyPieces.mask(dest).isEmpty()) {
+                // we've hit an enemy piece, break here
+                break;
+            }
+            dest = transform.apply(dest);
+        }
+
+        return acc;
     }
 
     public List<Function<BitBoard, BitBoard>> diagonalTransforms(BitBoard friendlyPieces) {

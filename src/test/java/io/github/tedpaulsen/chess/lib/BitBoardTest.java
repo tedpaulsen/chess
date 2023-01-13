@@ -48,4 +48,12 @@ public class BitBoardTest {
         Assertions.assertFalse(new BitBoard(0b0110).isSingleton());
         Assertions.assertFalse(new BitBoard(0b0000).isSingleton());
     }
+
+    @Test
+    public void testCount() {
+        Assertions.assertEquals(
+            1,
+            new BitBoard(0b00000000_00000000_00000000_00000000_00000000_00000000_01000000_00000000L).getPieceCount()
+        );
+    }
 }

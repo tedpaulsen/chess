@@ -22,7 +22,25 @@ public class PawnMoveGenTest extends TestBase {
             2 ........
             1 ........
               abcdefgh""",
-            generatePawnTargets(Side.WHITE, b).toString()
+            generatePawnMoveTargets(Side.WHITE, b).toString()
+        );
+    }
+
+    @Test
+    public void testPawnTargets() {
+        var b = BoardRepresentation.fromFen("R6n/2q1rp2/1p1p1kp1/1P6/2P1p3/5PP1/3P2K1/b7 w - - 4 24");
+        Assertions.assertEquals(
+            """
+            8 ........
+            7 ........
+            6 1.1.....
+            5 .1.1....
+            4 ....1111
+            3 ..1.1...
+            2 ........
+            1 ........
+              abcdefgh""",
+            pawnMoveGen.getSquaresAttacked(Side.WHITE, b).toString()
         );
     }
 
@@ -40,7 +58,7 @@ public class PawnMoveGenTest extends TestBase {
             2 ........
             1 ........
               abcdefgh""",
-            generatePawnTargets(Side.WHITE, b).toString()
+            generatePawnMoveTargets(Side.WHITE, b).toString()
         );
     }
 
@@ -58,7 +76,7 @@ public class PawnMoveGenTest extends TestBase {
             2 ........
             1 ........
               abcdefgh""",
-            generatePawnTargets(Side.WHITE, b).toString()
+            generatePawnMoveTargets(Side.WHITE, b).toString()
         );
     }
 
@@ -76,7 +94,7 @@ public class PawnMoveGenTest extends TestBase {
             2 ........
             1 ........
               abcdefgh""",
-            generatePawnTargets(Side.WHITE, b).toString()
+            generatePawnMoveTargets(Side.WHITE, b).toString()
         );
     }
 
@@ -94,7 +112,13 @@ public class PawnMoveGenTest extends TestBase {
             2 ........
             1 ........
               abcdefgh""",
-            generatePawnTargets(Side.WHITE, b).toString()
+            generatePawnMoveTargets(Side.WHITE, b).toString()
         );
+    }
+
+    @Test
+    public void pawnsGivingCheck() {
+        var b = BoardRepresentation.fromFen("R6n/2q1rp2/1p1p1kp1/1P4P1/2P1pPK1/8/3P4/b7 w - - 4 24");
+        Assertions.assertTrue(moveEngine.isInCheck(Side.BLACK, b));
     }
 }

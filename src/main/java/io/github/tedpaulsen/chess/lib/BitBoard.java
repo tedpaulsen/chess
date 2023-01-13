@@ -11,7 +11,7 @@ public class BitBoard {
 
     long value;
 
-    public boolean empty() {
+    public boolean isEmpty() {
         return value == 0;
     }
 
@@ -61,6 +61,42 @@ public class BitBoard {
 
     public BitBoard mask(long m) {
         return new BitBoard(value & m);
+    }
+
+    public BitBoard move(BitBoard from, BitBoard to) {
+        return remove(from).add(to);
+    }
+
+    public BitBoard union(BitBoard other) {
+        return new BitBoard(this.value | other.getValue());
+    }
+
+    public BitBoard intersect(BitBoard other) {
+        return new BitBoard(this.value & other.getValue());
+    }
+
+    public BitBoard intersect(long other) {
+        return new BitBoard(this.value & other);
+    }
+
+    public BitBoard add(BitBoard toAdd) {
+        return new BitBoard(this.value | toAdd.getValue());
+    }
+
+    public BitBoard remove(BitBoard toRemove) {
+        return this.mask(~toRemove.getValue());
+    }
+
+    public int getPieceCount() {
+        int count = 0;
+        long n = value;
+
+        while (n > 0) {
+            count += n & 1;
+            n >>= 1;
+        }
+
+        return count;
     }
 
     /**

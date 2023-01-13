@@ -22,7 +22,7 @@ public class RookMoveGenTest extends TestBase {
             2 ........
             1 11111...
               abcdefgh""",
-            generateRookTargets(Side.WHITE, board).toString()
+            generateRookMoveTargets(Side.WHITE, board).toString()
         );
     }
 
@@ -40,7 +40,7 @@ public class RookMoveGenTest extends TestBase {
             2 ........
             1 ........
               abcdefgh""",
-            generateRookTargets(Side.WHITE, board).toString()
+            generateRookMoveTargets(Side.WHITE, board).toString()
         );
     }
 
@@ -58,7 +58,7 @@ public class RookMoveGenTest extends TestBase {
             2 .......1
             1 .......1
               abcdefgh""",
-            generateRookTargets(Side.WHITE, board).toString()
+            generateRookMoveTargets(Side.WHITE, board).toString()
         );
     }
 
@@ -76,7 +76,7 @@ public class RookMoveGenTest extends TestBase {
             2 .......1
             1 1111111.
               abcdefgh""",
-            generateRookTargets(Side.WHITE, board).toString()
+            generateRookMoveTargets(Side.WHITE, board).toString()
         );
     }
 
@@ -94,7 +94,7 @@ public class RookMoveGenTest extends TestBase {
             2 1.......
             1 .1111111
               abcdefgh""",
-            generateRookTargets(Side.WHITE, board).toString()
+            generateRookMoveTargets(Side.WHITE, board).toString()
         );
     }
 
@@ -112,7 +112,7 @@ public class RookMoveGenTest extends TestBase {
             2 1.......
             1 1.......
               abcdefgh""",
-            generateRookTargets(Side.WHITE, board).toString()
+            generateRookMoveTargets(Side.WHITE, board).toString()
         );
     }
 }

@@ -1,6 +1,11 @@
 package io.github.tedpaulsen.chess.lib;
 
+import io.github.tedpaulsen.chess.lib.evaluation.CompositeEvaluator;
+import io.github.tedpaulsen.chess.lib.evaluation.Evaluator;
+import io.github.tedpaulsen.chess.lib.evaluation.MaterialEvaluator;
 import io.github.tedpaulsen.chess.lib.movegen.BishopMoveGen;
+import io.github.tedpaulsen.chess.lib.movegen.KingMoveGen;
+import io.github.tedpaulsen.chess.lib.movegen.KnightMoveGen;
 import io.github.tedpaulsen.chess.lib.movegen.MoveGen;
 import io.github.tedpaulsen.chess.lib.movegen.PawnMoveGen;
 import io.github.tedpaulsen.chess.lib.movegen.QueenMoveGen;
@@ -8,25 +13,57 @@ import io.github.tedpaulsen.chess.lib.movegen.RookMoveGen;
 
 public class TestBase {
 
-    protected final BishopMoveGen bishopMoveGen = new BishopMoveGen();
-    protected final RookMoveGen rookMoveGen = new RookMoveGen();
-    protected final PawnMoveGen pawnMoveGen = new PawnMoveGen();
-    protected final QueenMoveGen queenMoveGen = new QueenMoveGen();
+    protected final PawnMoveGen pawnMoveGen;
+    protected final KnightMoveGen knightMoveGen;
+    protected final BishopMoveGen bishopMoveGen;
+    protected final RookMoveGen rookMoveGen;
+    protected final QueenMoveGen queenMoveGen;
+    protected final KingMoveGen kingMoveGen;
 
-    public BitBoard generateBishopTargets(Side side, BoardRepresentation board) {
+    protected final MoveEngine moveEngine;
+
+    protected final Evaluator compositeEvaluator;
+
+    public TestBase() {
+        this.pawnMoveGen = new PawnMoveGen();
+        this.knightMoveGen = new KnightMoveGen();
+        this.bishopMoveGen = new BishopMoveGen();
+        this.rookMoveGen = new RookMoveGen();
+        this.queenMoveGen = new QueenMoveGen();
+        this.kingMoveGen = new KingMoveGen();
+
+        this.compositeEvaluator = CompositeEvaluator.of(new MaterialEvaluator());
+
+        this.moveEngine =
+            new MoveEngine(
+                pawnMoveGen,
+                knightMoveGen,
+                bishopMoveGen,
+                rookMoveGen,
+                queenMoveGen,
+                kingMoveGen,
+                compositeEvaluator
+            );
+    }
+
+    public BitBoard generateBishopMoveTargets(Side side, BoardRepresentation board) {
         return generateTargets(side, board, bishopMoveGen);
     }
 
-    public BitBoard generateRookTargets(Side side, BoardRepresentation board) {
+    public BitBoard generateRookMoveTargets(Side side, BoardRepresentation board) {
         return generateTargets(side, board, rookMoveGen);
     }
 
-    public BitBoard generatePawnTargets(Side side, BoardRepresentation board) {
+    public BitBoard generatePawnMoveTargets(Side side, BoardRepresentation board) {
         return generateTargets(side, board, pawnMoveGen);
     }
 
-    public BitBoard generateQueenTargets(Side side, BoardRepresentation board) {
+    public BitBoard generateQueenMoveTargets(Side side, BoardRepresentation board) {
         return generateTargets(side, board, queenMoveGen);
+    }
+
+    public BitBoard generateKingMoveTargets(Side side, BoardRepresentation board) {
+        return generateTargets(side, board, kingMoveGen);
     }
 
     private BitBoard generateTargets(Side side, BoardRepresentation board, MoveGen moveGenerator) {

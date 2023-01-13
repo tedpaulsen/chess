@@ -1,9 +1,14 @@
 package io.github.tedpaulsen.chess.lib;
 
 import java.math.BigInteger;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Value;
 
 @Value
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder(toBuilder = true)
 public class BoardRepresentation {
 
     BitBoard whitePawns;
@@ -18,34 +23,6 @@ public class BoardRepresentation {
     BitBoard blackRooks;
     BitBoard blackQueens;
     BitBoard blackKing;
-
-    private BoardRepresentation(
-        BitBoard whitePawns,
-        BitBoard whiteKnights,
-        BitBoard whiteBishops,
-        BitBoard whiteRooks,
-        BitBoard whiteQueens,
-        BitBoard whiteKing,
-        BitBoard blackPawns,
-        BitBoard blackKnights,
-        BitBoard blackBishops,
-        BitBoard blackRooks,
-        BitBoard blackQueens,
-        BitBoard blackKing
-    ) {
-        this.whitePawns = whitePawns;
-        this.whiteKnights = whiteKnights;
-        this.whiteBishops = whiteBishops;
-        this.whiteRooks = whiteRooks;
-        this.whiteQueens = whiteQueens;
-        this.whiteKing = whiteKing;
-        this.blackPawns = blackPawns;
-        this.blackKnights = blackKnights;
-        this.blackBishops = blackBishops;
-        this.blackRooks = blackRooks;
-        this.blackQueens = blackQueens;
-        this.blackKing = blackKing;
-    }
 
     public BitBoard getWhitePieces() {
         return new BitBoard(
@@ -71,6 +48,66 @@ public class BoardRepresentation {
 
     public BitBoard getEmpties() {
         return new BitBoard(~getBlackPieces().getValue() & ~getWhitePieces().getValue());
+    }
+
+    public BitBoard getPawns(Side side) {
+        return side.is(Side.WHITE) ? whitePawns : blackPawns;
+    }
+
+    public BitBoard getKnights(Side side) {
+        return side.is(Side.WHITE) ? whiteKnights : blackKnights;
+    }
+
+    public BitBoard getBishops(Side side) {
+        return side.is(Side.WHITE) ? whiteBishops : blackBishops;
+    }
+
+    public BitBoard getRooks(Side side) {
+        return side.is(Side.WHITE) ? whiteRooks : blackRooks;
+    }
+
+    public BitBoard getQueens(Side side) {
+        return side.is(Side.WHITE) ? whiteQueens : blackQueens;
+    }
+
+    public BitBoard getKing(Side side) {
+        return side.is(Side.WHITE) ? whiteKing : blackKing;
+    }
+
+    public BitBoard get(char piece) {
+        return switch (piece) {
+            case 'K' -> getWhiteKing();
+            case 'k' -> getBlackKing();
+            case 'Q' -> getWhiteQueens();
+            case 'q' -> getBlackQueens();
+            case 'R' -> getWhiteRooks();
+            case 'r' -> getBlackRooks();
+            case 'B' -> getWhiteBishops();
+            case 'b' -> getBlackBishops();
+            case 'N' -> getWhiteKnights();
+            case 'n' -> getBlackKnights();
+            case 'P' -> getWhitePawns();
+            case 'p' -> getBlackPawns();
+            default -> throw new IllegalArgumentException("Invalid piece");
+        };
+    }
+
+    public BoardRepresentation set(char piece, BitBoard updatedPieces) {
+        return switch (piece) {
+            case 'K' -> this.toBuilder().whiteKing(updatedPieces).build();
+            case 'k' -> this.toBuilder().blackKing(updatedPieces).build();
+            case 'Q' -> this.toBuilder().whiteQueens(updatedPieces).build();
+            case 'q' -> this.toBuilder().blackQueens(updatedPieces).build();
+            case 'R' -> this.toBuilder().whiteRooks(updatedPieces).build();
+            case 'r' -> this.toBuilder().blackRooks(updatedPieces).build();
+            case 'B' -> this.toBuilder().whiteBishops(updatedPieces).build();
+            case 'b' -> this.toBuilder().blackBishops(updatedPieces).build();
+            case 'N' -> this.toBuilder().whiteKnights(updatedPieces).build();
+            case 'n' -> this.toBuilder().blackKnights(updatedPieces).build();
+            case 'P' -> this.toBuilder().whitePawns(updatedPieces).build();
+            case 'p' -> this.toBuilder().blackPawns(updatedPieces).build();
+            default -> throw new IllegalArgumentException("Invalid piece");
+        };
     }
 
     public static BoardRepresentation initial() {

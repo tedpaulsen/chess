@@ -9,6 +9,10 @@ public class Move {
     BitBoard from;
     BitBoard to;
 
+    public Side getSide() {
+        return piece <= 'Z' ? Side.WHITE : Side.BLACK;
+    }
+
     @Override
     public String toString() {
         return """

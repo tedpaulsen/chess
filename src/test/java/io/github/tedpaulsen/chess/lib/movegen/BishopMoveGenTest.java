@@ -22,7 +22,25 @@ public class BishopMoveGenTest extends TestBase {
             2 ........
             1 ...1....
               abcdefgh""",
-            generateBishopTargets(Side.WHITE, board).toString()
+            generateBishopMoveTargets(Side.WHITE, board).toString()
+        );
+    }
+
+    @Test
+    public void testBishopTargetsWithFriendlyAndEnemyPieces() {
+        var board = BoardRepresentation.fromFen("5rk1/2qb1ppp/1p1p1n2/1P2p3/1BP5/4P3/3NBPPP/5RK1 w - - 4 24");
+        Assertions.assertEquals(
+            """
+            8 ........
+            7 ........
+            6 ...1....
+            5 1.1....1
+            4 ......1.
+            3 1.11.1..
+            2 ........
+            1 ...1....
+              abcdefgh""",
+            bishopMoveGen.getSquaresAttacked(Side.WHITE, board).toString()
         );
     }
 
@@ -40,7 +58,7 @@ public class BishopMoveGenTest extends TestBase {
             2 ......1.
             1 ........
               abcdefgh""",
-            generateBishopTargets(Side.WHITE, board).toString()
+            generateBishopMoveTargets(Side.WHITE, board).toString()
         );
     }
 
@@ -58,7 +76,7 @@ public class BishopMoveGenTest extends TestBase {
             2 .1......
             1 ........
               abcdefgh""",
-            generateBishopTargets(Side.WHITE, board).toString()
+            generateBishopMoveTargets(Side.WHITE, board).toString()
         );
     }
 
@@ -76,7 +94,7 @@ public class BishopMoveGenTest extends TestBase {
             2 ......1.
             1 .......1
               abcdefgh""",
-            generateBishopTargets(Side.WHITE, board).toString()
+            generateBishopMoveTargets(Side.WHITE, board).toString()
         );
     }
 
@@ -94,7 +112,7 @@ public class BishopMoveGenTest extends TestBase {
             2 .1......
             1 1.......
               abcdefgh""",
-            generateBishopTargets(Side.WHITE, board).toString()
+            generateBishopMoveTargets(Side.WHITE, board).toString()
         );
     }
 }

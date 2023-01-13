@@ -14,9 +14,8 @@ public class PawnMoveGen implements MoveGen {
         List<Move> moves = new ArrayList<>();
 
         char pieceCode = side.is(Side.WHITE) ? 'P' : 'p';
-        BitBoard friendlyPieces = side.is(Side.WHITE) ? board.getWhitePieces() : board.getBlackPieces();
         BitBoard enemyPieces = side.is(Side.WHITE) ? board.getBlackPieces() : board.getWhitePieces();
-        BitBoard empties = new BitBoard(~friendlyPieces.getValue() & ~enemyPieces.getValue());
+        BitBoard empties = board.getEmpties();
         BitBoard pawns = side.is(Side.WHITE) ? board.getWhitePawns() : board.getBlackPawns();
 
         for (BitBoard pawn : pawns.toSingletons()) {
@@ -47,6 +46,20 @@ public class PawnMoveGen implements MoveGen {
             }
         }
 
-        return moves.stream().filter(m -> !m.getTo().empty()).toList();
+        return moves.stream().filter(m -> !m.getTo().isEmpty()).toList();
+    }
+
+    @Override
+    public BitBoard getSquaresAttacked(Side side, BoardRepresentation board) {
+        if (side.is(Side.WHITE)) {
+            return get(side, board).shiftLeft(9).union(board.getWhitePawns().shiftLeft(7));
+        } else {
+            return get(side, board).shiftRight(9).union(board.getWhitePawns().shiftRight(7));
+        }
+    }
+
+    @Override
+    public BitBoard get(Side side, BoardRepresentation board) {
+        return side.is(Side.WHITE) ? board.getWhitePawns() : board.getBlackPawns();
     }
 }

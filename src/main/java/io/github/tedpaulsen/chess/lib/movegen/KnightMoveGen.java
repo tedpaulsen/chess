@@ -15,9 +15,8 @@ public class KnightMoveGen implements MoveGen {
 
         char pieceCode = side.is(Side.WHITE) ? 'N' : 'n';
         BitBoard friendlyPieces = side.is(Side.WHITE) ? board.getWhitePieces() : board.getBlackPieces();
-        BitBoard knights = side.is(Side.WHITE) ? board.getWhiteKnights() : board.getBlackKnights();
 
-        for (BitBoard knight : knights.toSingletons()) {
+        for (BitBoard knight : get(side, board).toSingletons()) {
             // NNE
             moves.add(new Move(pieceCode, knight, knight.notHFile().shiftLeft(17).mask(~friendlyPieces.getValue())));
             // NEE
@@ -49,5 +48,26 @@ public class KnightMoveGen implements MoveGen {
         }
 
         return moves;
+    }
+
+    @Override
+    public BitBoard getSquaresAttacked(Side side, BoardRepresentation board) {
+        BitBoard friendlyPieces = side.is(Side.WHITE) ? board.getWhitePieces() : board.getBlackPieces();
+        BitBoard pawns = get(side, board);
+        return pawns
+            .shiftLeft(17)
+            .intersect(~friendlyPieces.getValue())
+            .union(pawns.shiftLeft(15).intersect(~friendlyPieces.getValue()))
+            .union(pawns.shiftLeft(10).intersect(~friendlyPieces.getValue()))
+            .union(pawns.shiftLeft(6).intersect(~friendlyPieces.getValue()))
+            .union(pawns.shiftRight(6).intersect(~friendlyPieces.getValue()))
+            .union(pawns.shiftRight(10).intersect(~friendlyPieces.getValue()))
+            .union(pawns.shiftRight(15).intersect(~friendlyPieces.getValue()))
+            .union(pawns.shiftRight(17).intersect(~friendlyPieces.getValue()));
+    }
+
+    @Override
+    public BitBoard get(Side side, BoardRepresentation board) {
+        return side.is(Side.WHITE) ? board.getWhiteKnights() : board.getBlackKnights();
     }
 }

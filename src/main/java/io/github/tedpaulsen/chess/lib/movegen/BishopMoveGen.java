@@ -7,8 +7,6 @@ import io.github.tedpaulsen.chess.lib.Side;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 public class BishopMoveGen extends SliderMoveGen implements MoveGen {
 
@@ -17,19 +15,15 @@ public class BishopMoveGen extends SliderMoveGen implements MoveGen {
         List<Move> moves = new ArrayList<>();
 
         char piece = side.is(Side.WHITE) ? 'B' : 'b';
-        BitBoard bishops = side.is(Side.WHITE) ? board.getWhiteBishops() : board.getBlackBishops();
         BitBoard enemyPieces = side.is(Side.WHITE) ? board.getBlackPieces() : board.getWhitePieces();
 
-        for (BitBoard bishop : bishops.toSingletons()) {
+        for (BitBoard bishop : get(side, board).toSingletons()) {
             BitBoard friendlyPieces =
                 (side.is(Side.WHITE) ? board.getWhitePieces() : board.getBlackPieces()).mask(~bishop.getValue());
 
-            Stream<Function<BitBoard, BitBoard>> transforms = Stream
-                .of(diagonalTransforms(friendlyPieces))
-                .flatMap(Collection::stream);
-
             moves.addAll(
-                transforms
+                diagonalTransforms(friendlyPieces)
+                    .stream()
                     .map(transform -> generateMovesFromTransform(piece, bishop, transform, enemyPieces))
                     .flatMap(Collection::stream)
                     .toList()
@@ -37,5 +31,28 @@ public class BishopMoveGen extends SliderMoveGen implements MoveGen {
         }
 
         return moves;
+    }
+
+    @Override
+    public BitBoard getSquaresAttacked(Side side, BoardRepresentation board) {
+        BitBoard friendlyPieces = side.is(Side.WHITE) ? board.getWhitePieces() : board.getBlackPieces();
+        BitBoard enemyPieces = side.is(Side.WHITE) ? board.getBlackPieces() : board.getWhitePieces();
+
+        BitBoard acc = new BitBoard(0L);
+        for (BitBoard bishop : get(side, board).toSingletons()) {
+            acc =
+                acc.union(
+                    diagonalTransforms(friendlyPieces)
+                        .stream()
+                        .map(transform -> generateTargetSquaresFromTransform(bishop, transform, enemyPieces))
+                        .reduce(new BitBoard(0L), BitBoard::union)
+                );
+        }
+        return acc;
+    }
+
+    @Override
+    public BitBoard get(Side side, BoardRepresentation board) {
+        return side.is(Side.WHITE) ? board.getWhiteBishops() : board.getBlackBishops();
     }
 }

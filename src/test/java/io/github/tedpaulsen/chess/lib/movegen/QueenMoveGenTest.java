@@ -22,7 +22,25 @@ public class QueenMoveGenTest extends TestBase {
             2 ........
             1 ........
               abcdefgh""",
-            generateQueenTargets(Side.WHITE, b).toString()
+            generateQueenMoveTargets(Side.WHITE, b).toString()
+        );
+    }
+
+    @Test
+    public void testQueenTargetsGen() {
+        var b = BoardRepresentation.fromFen("r6k/p1p2Q1p/1bp4p/3pP3/3P2bq/2P1R3/PP3PP1/6K1 b - - 3 25");
+        Assertions.assertEquals(
+            """
+            8 ....111.
+            7 ..111.11
+            6 ....111.
+            5 ...1.1.1
+            4 .....1..
+            3 .....1..
+            2 ........
+            1 ........
+              abcdefgh""",
+            queenMoveGen.getSquaresAttacked(Side.WHITE, b).toString()
         );
     }
 }
