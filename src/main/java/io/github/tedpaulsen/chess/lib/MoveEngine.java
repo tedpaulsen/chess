@@ -1,6 +1,8 @@
 package io.github.tedpaulsen.chess.lib;
 
 import io.github.tedpaulsen.chess.lib.evaluation.Evaluator;
+import io.github.tedpaulsen.chess.lib.exception.MoveIntoCheckException;
+import io.github.tedpaulsen.chess.lib.exception.StalemateException;
 import io.github.tedpaulsen.chess.lib.movegen.BishopMoveGen;
 import io.github.tedpaulsen.chess.lib.movegen.KingMoveGen;
 import io.github.tedpaulsen.chess.lib.movegen.KnightMoveGen;
@@ -28,11 +30,17 @@ public class MoveEngine {
     private final Evaluator evaluator;
 
     public BoardRepresentation move(Side side, BoardRepresentation board) {
+        List<Move> pseudoLegalMoves = generateAllPseudoLegalMoves(side, board);
+
+        if (pseudoLegalMoves.isEmpty()) {
+            throw new StalemateException("No pseudo-legal moves exist");
+        }
+
         // I'm using map.entry as queue elements so that I can compute the priority statically before inserting
         // the element. The standard priority queue impl relies only on the elements being comparable and I want
         // to avoid re-evaluating log(n) moves every move when having to insert a new move to my priority queue.
         PriorityQueue<Map.Entry<Move, Double>> orderedMoves = new PriorityQueue<>(Map.Entry.comparingByValue());
-        for (Move moveToEval : generateAllPseudoLegalMoves(side, board)) {
+        for (Move moveToEval : pseudoLegalMoves) {
             try {
                 BoardRepresentation newBoard = makeMove(board, moveToEval);
                 orderedMoves.add(Map.entry(moveToEval, evaluator.evaluate(side, newBoard)));
@@ -41,7 +49,13 @@ public class MoveEngine {
             }
         }
 
+        if (orderedMoves.isEmpty()) {
+            throw new StalemateException("No legal moves exist");
+        }
+
         Move bestMove = orderedMoves.poll().getKey();
+        log.info("Moving {} from {} to {}", bestMove.getPiece(), bestMove.getFrom(), bestMove.getTo());
+
         return makeMove(board, bestMove);
     }
 

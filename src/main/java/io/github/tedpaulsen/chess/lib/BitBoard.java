@@ -64,7 +64,7 @@ public class BitBoard {
     }
 
     public BitBoard move(BitBoard from, BitBoard to) {
-        return remove(from).add(to);
+        return invert(from).union(to);
     }
 
     public BitBoard union(BitBoard other) {
@@ -79,11 +79,7 @@ public class BitBoard {
         return new BitBoard(this.value & other);
     }
 
-    public BitBoard add(BitBoard toAdd) {
-        return new BitBoard(this.value | toAdd.getValue());
-    }
-
-    public BitBoard remove(BitBoard toRemove) {
+    public BitBoard invert(BitBoard toRemove) {
         return this.mask(~toRemove.getValue());
     }
 
