@@ -1,13 +1,10 @@
 package io.github.tedpaulsen.chess.lib;
 
 import java.math.BigInteger;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 @Value
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
 public class BoardRepresentation {
 
@@ -23,6 +20,9 @@ public class BoardRepresentation {
     BitBoard blackRooks;
     BitBoard blackQueens;
     BitBoard blackKing;
+
+    @Builder.Default
+    BitBoard enPassantSquare = new BitBoard(0L);
 
     public BitBoard getWhitePieces() {
         return new BitBoard(
@@ -74,8 +74,8 @@ public class BoardRepresentation {
         return side.is(Side.WHITE) ? whiteKing : blackKing;
     }
 
-    public BitBoard get(char piece) {
-        return switch (piece) {
+    public BitBoard getPieces(char pieceCode) {
+        return switch (pieceCode) {
             case 'K' -> getWhiteKing();
             case 'k' -> getBlackKing();
             case 'Q' -> getWhiteQueens();
@@ -88,7 +88,7 @@ public class BoardRepresentation {
             case 'n' -> getBlackKnights();
             case 'P' -> getWhitePawns();
             case 'p' -> getBlackPawns();
-            default -> throw new IllegalArgumentException("Invalid piece");
+            default -> throw new IllegalArgumentException("Invalid pieceCode");
         };
     }
 
@@ -125,20 +125,21 @@ public class BoardRepresentation {
         BitBoard blackQueens  = new BitBoard(0b00001000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L);
         BitBoard blackKing    = new BitBoard(0b00010000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L);
         // spotless:on
-        return new BoardRepresentation(
-            whitePawns,
-            whiteKnights,
-            whiteBishops,
-            whiteRooks,
-            whiteQueens,
-            whiteKing,
-            blackPawns,
-            blackKnights,
-            blackBishops,
-            blackRooks,
-            blackQueens,
-            blackKing
-        );
+        return BoardRepresentation
+            .builder()
+            .whitePawns(whitePawns)
+            .whiteKnights(whiteKnights)
+            .whiteBishops(whiteBishops)
+            .whiteRooks(whiteRooks)
+            .whiteQueens(whiteQueens)
+            .whiteKing(whiteKing)
+            .blackPawns(blackPawns)
+            .blackKnights(blackKnights)
+            .blackBishops(blackBishops)
+            .blackRooks(blackRooks)
+            .blackQueens(blackQueens)
+            .blackKing(blackKing)
+            .build();
     }
 
     public static BoardRepresentation fromFen(String fen) {
@@ -155,7 +156,9 @@ public class BoardRepresentation {
         StringBuilder bQ = new StringBuilder();
         StringBuilder bK = new StringBuilder();
 
-        String[] ranks = fen.trim().split(" ")[0].split("/");
+        String[] fenParts = fen.trim().split(" ");
+
+        String[] ranks = fenParts[0].split("/");
         for (int r = 0; r < ranks.length; r++) {
             for (int sq = ranks[r].length() - 1; sq >= 0; sq--) {
                 char c = ranks[r].charAt(sq);
@@ -334,19 +337,34 @@ public class BoardRepresentation {
             }
         }
 
-        return new BoardRepresentation(
-            new BitBoard(new BigInteger(wP.toString(), 2).longValue()),
-            new BitBoard(new BigInteger(wN.toString(), 2).longValue()),
-            new BitBoard(new BigInteger(wB.toString(), 2).longValue()),
-            new BitBoard(new BigInteger(wR.toString(), 2).longValue()),
-            new BitBoard(new BigInteger(wQ.toString(), 2).longValue()),
-            new BitBoard(new BigInteger(wK.toString(), 2).longValue()),
-            new BitBoard(new BigInteger(bP.toString(), 2).longValue()),
-            new BitBoard(new BigInteger(bN.toString(), 2).longValue()),
-            new BitBoard(new BigInteger(bB.toString(), 2).longValue()),
-            new BitBoard(new BigInteger(bR.toString(), 2).longValue()),
-            new BitBoard(new BigInteger(bQ.toString(), 2).longValue()),
-            new BitBoard(new BigInteger(bK.toString(), 2).longValue())
-        );
+        BoardRepresentation.BoardRepresentationBuilder builder = BoardRepresentation
+            .builder()
+            .whitePawns(new BitBoard(new BigInteger(wP.toString(), 2).longValue()))
+            .whiteKnights(new BitBoard(new BigInteger(wN.toString(), 2).longValue()))
+            .whiteBishops(new BitBoard(new BigInteger(wB.toString(), 2).longValue()))
+            .whiteRooks(new BitBoard(new BigInteger(wR.toString(), 2).longValue()))
+            .whiteQueens(new BitBoard(new BigInteger(wQ.toString(), 2).longValue()))
+            .whiteKing(new BitBoard(new BigInteger(wK.toString(), 2).longValue()))
+            .blackPawns(new BitBoard(new BigInteger(bP.toString(), 2).longValue()))
+            .blackKnights(new BitBoard(new BigInteger(bN.toString(), 2).longValue()))
+            .blackBishops(new BitBoard(new BigInteger(bB.toString(), 2).longValue()))
+            .blackRooks(new BitBoard(new BigInteger(bR.toString(), 2).longValue()))
+            .blackQueens(new BitBoard(new BigInteger(bQ.toString(), 2).longValue()))
+            .blackKing(new BitBoard(new BigInteger(bK.toString(), 2).longValue()));
+
+        String enPassantSquare = fenParts[3].toLowerCase();
+        if (!"-".equals(enPassantSquare)) {
+            long val = 1;
+
+            int file = enPassantSquare.charAt(0) - 'a';
+            int rank = enPassantSquare.charAt(1) - '1';
+
+            val <<= file;
+            val <<= rank * 8;
+
+            builder.enPassantSquare(new BitBoard(val));
+        }
+
+        return builder.build();
     }
 }

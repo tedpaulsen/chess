@@ -24,25 +24,69 @@ public class PawnMoveGen implements MoveGen {
                 moves.add(new Move(pieceCode, pawn, pawn.shiftLeft(8).mask(empties)));
                 // left capture
                 moves.add(new Move(pieceCode, pawn, pawn.notAFile().shiftLeft(7).mask(enemyPieces)));
+                // left en passant capture
+                moves.add(
+                    new Move(
+                        pieceCode,
+                        pawn,
+                        pawn.notHFile().shiftLeft(7).mask(board.getEnPassantSquare()),
+                        Move.Kind.EN_PASSANT_CAPTURE
+                    )
+                );
                 // right capture
                 moves.add(new Move(pieceCode, pawn, pawn.notHFile().shiftLeft(9).mask(enemyPieces)));
+                // right en passant capture
+                moves.add(
+                    new Move(
+                        pieceCode,
+                        pawn,
+                        pawn.notHFile().shiftLeft(9).mask(board.getEnPassantSquare()),
+                        Move.Kind.EN_PASSANT_CAPTURE
+                    )
+                );
                 // double advance
                 moves.add(
-                    new Move(pieceCode, pawn, pawn.rank2().shiftLeft(8).mask(empties).shiftLeft(8).mask(empties))
+                    new Move(
+                        pieceCode,
+                        pawn,
+                        pawn.rank2().shiftLeft(8).mask(empties).shiftLeft(8).mask(empties),
+                        Move.Kind.PAWN_DOUBLE_ADVANCE
+                    )
                 );
-                // TODO: en-passant capture
             } else {
                 // advance
                 moves.add(new Move(pieceCode, pawn, pawn.shiftRight(8).mask(empties)));
                 // left capture
                 moves.add(new Move(pieceCode, pawn, pawn.notHFile().shiftRight(7).mask(enemyPieces)));
+                // left en passant capture
+                moves.add(
+                    new Move(
+                        pieceCode,
+                        pawn,
+                        pawn.notHFile().shiftRight(7).mask(board.getEnPassantSquare()),
+                        Move.Kind.EN_PASSANT_CAPTURE
+                    )
+                );
                 // right capture
                 moves.add(new Move(pieceCode, pawn, pawn.notAFile().shiftRight(9).mask(enemyPieces)));
+                // right en passant capture
+                moves.add(
+                    new Move(
+                        pieceCode,
+                        pawn,
+                        pawn.notAFile().shiftRight(9).mask(board.getEnPassantSquare()),
+                        Move.Kind.EN_PASSANT_CAPTURE
+                    )
+                );
                 // double advance
                 moves.add(
-                    new Move(pieceCode, pawn, pawn.rank7().shiftRight(8).mask(empties).shiftRight(8).mask(empties))
+                    new Move(
+                        pieceCode,
+                        pawn,
+                        pawn.rank7().shiftRight(8).mask(empties).shiftRight(8).mask(empties),
+                        Move.Kind.PAWN_DOUBLE_ADVANCE
+                    )
                 );
-                // TODO: en-passant capture
             }
         }
 

@@ -28,6 +28,7 @@ public class MoveEngine {
     private final KingMoveGen kingMoveGen;
 
     private final Evaluator evaluator;
+    private final MoveApplier moveApplier;
 
     public BoardRepresentation move(Side side, BoardRepresentation board) {
         List<Move> pseudoLegalMoves = generateAllPseudoLegalMoves(side, board);
@@ -71,11 +72,10 @@ public class MoveEngine {
     }
 
     private BoardRepresentation makeMove(BoardRepresentation board, Move move) {
-        BitBoard updatedPieces = board.get(move.getPiece()).move(move.getFrom(), move.getTo());
-        BoardRepresentation updatedBoard = board.set(move.getPiece(), updatedPieces);
+        BoardRepresentation updatedBoard = moveApplier.applyMove(board, move);
 
         if (isInCheck(move.getSide(), updatedBoard)) {
-            throw new MoveIntoCheckException("move into check");
+            throw new MoveIntoCheckException("Cannot move into check");
         }
 
         return updatedBoard;

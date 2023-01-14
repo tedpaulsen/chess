@@ -121,4 +121,22 @@ public class PawnMoveGenTest extends TestBase {
         var b = BoardRepresentation.fromFen("R6n/2q1rp2/1p1p1kp1/1P4P1/2P1pPK1/8/3P4/b7 w - - 4 24");
         Assertions.assertTrue(moveEngine.isInCheck(Side.BLACK, b));
     }
+
+    @Test
+    public void testEnPassantCapture() {
+        var b = BoardRepresentation.fromFen("rnbqkbnr/pppp2pp/4p3/4Pp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3");
+        Assertions.assertEquals(
+            """
+            8 ........
+            7 ........
+            6 .....1..
+            5 ........
+            4 1111.111
+            3 1111.111
+            2 ........
+            1 ........
+              abcdefgh""",
+            generatePawnMoveTargets(Side.WHITE, b).toString()
+        );
+    }
 }

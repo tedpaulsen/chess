@@ -24,6 +24,8 @@ public class TestBase {
 
     protected final Evaluator compositeEvaluator;
 
+    protected final MoveApplier moveApplier;
+
     public TestBase() {
         this.pawnMoveGen = new PawnMoveGen();
         this.knightMoveGen = new KnightMoveGen();
@@ -34,6 +36,8 @@ public class TestBase {
 
         this.compositeEvaluator = CompositeEvaluator.of(new MaterialEvaluator());
 
+        this.moveApplier = new MoveApplier();
+
         this.moveEngine =
             new MoveEngine(
                 pawnMoveGen,
@@ -42,7 +46,8 @@ public class TestBase {
                 rookMoveGen,
                 queenMoveGen,
                 kingMoveGen,
-                compositeEvaluator
+                compositeEvaluator,
+                moveApplier
             );
     }
 
