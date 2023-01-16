@@ -24,6 +24,9 @@ public class BoardRepresentation {
     @Builder.Default
     BitBoard enPassantSquare = new BitBoard(0L);
 
+    @Builder.Default
+    String castlingInformation = "KQkq";
+
     public BitBoard getWhitePieces() {
         return new BitBoard(
             whitePawns.getValue() |
@@ -72,6 +75,18 @@ public class BoardRepresentation {
 
     public BitBoard getKing(Side side) {
         return side.is(Side.WHITE) ? whiteKing : blackKing;
+    }
+
+    public BitBoard getKingSideRook(Side side) {
+        return side.is(Side.WHITE)
+            ? getWhiteRooks().mask(1L << 7) // h1
+            : getBlackRooks().mask(1L << 63); // h8
+    }
+
+    public BitBoard getQueenSideRook(Side side) {
+        return side.is(Side.WHITE)
+            ? getWhiteRooks().mask(1L) // a1
+            : getBlackRooks().mask(1L << 56); // a8
     }
 
     public BitBoard getPieces(char pieceCode) {
@@ -351,6 +366,8 @@ public class BoardRepresentation {
             .blackRooks(new BitBoard(new BigInteger(bR.toString(), 2).longValue()))
             .blackQueens(new BitBoard(new BigInteger(bQ.toString(), 2).longValue()))
             .blackKing(new BitBoard(new BigInteger(bK.toString(), 2).longValue()));
+
+        builder.castlingInformation(fenParts[2]);
 
         String enPassantSquare = fenParts[3].toLowerCase();
         if (!"-".equals(enPassantSquare)) {

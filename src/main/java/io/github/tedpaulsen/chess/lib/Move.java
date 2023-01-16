@@ -42,6 +42,8 @@ public class Move {
     public enum Kind {
         EN_PASSANT_CAPTURE("en-passant-capture"),
         PAWN_DOUBLE_ADVANCE("pawn-double-advance"),
+        KING_SIDE_CASTLE("king-side-castle"),
+        QUEEN_SIDE_CASTLE("queen-side-castle"),
         NORMAL("normal");
 
         private final String value;
