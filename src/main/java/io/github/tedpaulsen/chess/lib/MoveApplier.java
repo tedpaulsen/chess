@@ -18,8 +18,8 @@ public class MoveApplier {
         removeEnPassantCapturedPawn(currBoard, moveToApply, builder);
         setPromotedPawn(currBoard, moveToApply, builder);
 
-        // only move the piece to its destination if not a pawn promotion.
-        // pawn promotion move was handled earlier.
+        // only move the piece to its destination if not a pawn promotion. pawn promotion
+        // is the only move where the piece moving is actually removed from the board.
         if (
             !moveToApply.getMoveKind().equals(Move.Kind.PAWN_PROMOTE_TO_QUEEN) &&
             !moveToApply.getMoveKind().equals(Move.Kind.PAWN_PROMOTE_TO_ROOK) &&
