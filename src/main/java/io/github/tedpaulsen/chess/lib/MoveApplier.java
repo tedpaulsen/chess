@@ -1,5 +1,7 @@
 package io.github.tedpaulsen.chess.lib;
 
+import java.util.function.Function;
+
 public class MoveApplier {
 
     private static final long WHITE_QUEEN_SIDE_ROOK = 1L;
@@ -12,14 +14,27 @@ public class MoveApplier {
 
         applyCastlingChanges(currBoard, moveToApply, builder);
         setEnPassantSquare(currBoard, moveToApply, builder);
-        maybeRemoveCapturedPiece(currBoard, moveToApply, builder);
-        maybeRemoveEnPassantCapturedPawn(currBoard, moveToApply, builder);
+        removeCapturedPiece(currBoard, moveToApply, builder);
+        removeEnPassantCapturedPawn(currBoard, moveToApply, builder);
+        setPromotedPawn(currBoard, moveToApply, builder);
 
-        BitBoard updatedFriendlyPieces = currBoard
-            .getPieces(moveToApply.getPiece())
-            .move(moveToApply.getFrom(), moveToApply.getTo());
-
-        return builder.build().set(moveToApply.getPiece(), updatedFriendlyPieces);
+        // only move the piece to its destination if not a pawn promotion.
+        // pawn promotion move was handled earlier.
+        if (
+            !moveToApply.getMoveKind().equals(Move.Kind.PAWN_PROMOTE_TO_QUEEN) &&
+            !moveToApply.getMoveKind().equals(Move.Kind.PAWN_PROMOTE_TO_ROOK) &&
+            !moveToApply.getMoveKind().equals(Move.Kind.PAWN_PROMOTE_TO_BISHOP) &&
+            !moveToApply.getMoveKind().equals(Move.Kind.PAWN_PROMOTE_TO_KNIGHT)
+        ) {
+            return builder
+                .build()
+                .set(
+                    moveToApply.getPiece(),
+                    currBoard.getPieces(moveToApply.getPiece()).move(moveToApply.getFrom(), moveToApply.getTo())
+                );
+        } else {
+            return builder.build();
+        }
     }
 
     /**
@@ -28,7 +43,7 @@ public class MoveApplier {
      * @param moveToApply the move we're applying
      * @param builder board builder object for the new board state
      */
-    private void maybeRemoveCapturedPiece(
+    private void removeCapturedPiece(
         BoardRepresentation currBoard,
         Move moveToApply,
         BoardRepresentation.BoardRepresentationBuilder builder
@@ -152,7 +167,7 @@ public class MoveApplier {
      * @param moveToApply the move we're applying
      * @param builder board builder object for the new board state
      */
-    private void maybeRemoveEnPassantCapturedPawn(
+    private void removeEnPassantCapturedPawn(
         BoardRepresentation currBoard,
         Move moveToApply,
         BoardRepresentation.BoardRepresentationBuilder builder
@@ -166,6 +181,62 @@ public class MoveApplier {
                 builder.whitePawns(
                     currBoard.getWhitePawns().intersect(~currBoard.getEnPassantSquare().shiftLeft(8).getValue())
                 );
+            }
+        }
+    }
+
+    /**
+     * If the move we're applying is a pawn promotion, we must replace the pawn with the promoted piece
+     * @param currBoard the current board (before the move)
+     * @param moveToApply the move we're applying
+     * @param builder board builder object for the new board state
+     */
+    private void setPromotedPawn(
+        BoardRepresentation currBoard,
+        Move moveToApply,
+        BoardRepresentation.BoardRepresentationBuilder builder
+    ) {
+        Move.Kind kind = moveToApply.getMoveKind();
+        boolean isWhiteMove = Side.WHITE.is(moveToApply.getSide());
+
+        if (
+            Move.Kind.PAWN_PROMOTE_TO_QUEEN.equals(kind) ||
+            Move.Kind.PAWN_PROMOTE_TO_ROOK.equals(kind) ||
+            Move.Kind.PAWN_PROMOTE_TO_BISHOP.equals(kind) ||
+            Move.Kind.PAWN_PROMOTE_TO_KNIGHT.equals(kind)
+        ) {
+            // the builder function to set the bitboard for the promoted piece of choice
+            Function<BitBoard, BoardRepresentation.BoardRepresentationBuilder> setter =
+                switch (kind) {
+                    case PAWN_PROMOTE_TO_QUEEN -> isWhiteMove ? builder::whiteQueens : builder::blackQueens;
+                    case PAWN_PROMOTE_TO_ROOK -> isWhiteMove ? builder::whiteRooks : builder::blackRooks;
+                    case PAWN_PROMOTE_TO_BISHOP -> isWhiteMove ? builder::whiteBishops : builder::blackBishops;
+                    case PAWN_PROMOTE_TO_KNIGHT -> isWhiteMove ? builder::whiteKnights : builder::blackKnights;
+                    default -> throw new IllegalArgumentException("Unexpected move kind");
+                };
+
+            // the current bitboard for the promoted piece of choice
+            BitBoard current =
+                switch (kind) {
+                    case PAWN_PROMOTE_TO_QUEEN -> isWhiteMove ? currBoard.getWhiteQueens() : currBoard.getBlackQueens();
+                    case PAWN_PROMOTE_TO_ROOK -> isWhiteMove ? currBoard.getWhiteRooks() : currBoard.getBlackRooks();
+                    case PAWN_PROMOTE_TO_BISHOP -> isWhiteMove
+                        ? currBoard.getWhiteBishops()
+                        : currBoard.getBlackBishops();
+                    case PAWN_PROMOTE_TO_KNIGHT -> isWhiteMove
+                        ? currBoard.getWhiteKnights()
+                        : currBoard.getBlackKnights();
+                    default -> throw new IllegalArgumentException("Unexpected move kind");
+                };
+
+            // add the chosen promoted piece to its appropriate bitboard
+            setter.apply(current.union(moveToApply.getTo()));
+
+            // remove the promoted pawn
+            if (isWhiteMove) {
+                builder.whitePawns(currBoard.getWhitePawns().intersect(~moveToApply.getFrom().getValue()));
+            } else {
+                builder.blackPawns(currBoard.getBlackPawns().intersect(~moveToApply.getFrom().getValue()));
             }
         }
     }

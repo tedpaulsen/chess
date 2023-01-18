@@ -1,8 +1,13 @@
 package io.github.tedpaulsen.chess.lib.movegen;
 
 import io.github.tedpaulsen.chess.lib.BoardRepresentation;
+import io.github.tedpaulsen.chess.lib.Move;
 import io.github.tedpaulsen.chess.lib.Side;
+import io.github.tedpaulsen.chess.lib.Square;
 import io.github.tedpaulsen.chess.lib.TestBase;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -138,5 +143,28 @@ public class PawnMoveGenTest extends TestBase {
               abcdefgh""",
             generatePawnMoveTargets(Side.WHITE, b).toString()
         );
+    }
+
+    @Test
+    public void testPawnPromotion() {
+        var b = BoardRepresentation.fromFen("8/2PR3p/p5k1/1P4p1/8/1P4p1/5P1P/4R1K1 w - - 1 45");
+        List<Move> pawnC7Moves = pawnMoveGen
+            .generateMoves(Side.WHITE, b)
+            .stream()
+            .filter(move -> move.getFrom().equals(Square.C(7)))
+            .toList();
+
+        // pawn on c7 can promote to queen, rook, bishop, or knight
+        Assertions.assertEquals(4, pawnC7Moves.size());
+        Assertions.assertEquals(
+            Set.of(
+                Move.Kind.PAWN_PROMOTE_TO_QUEEN,
+                Move.Kind.PAWN_PROMOTE_TO_ROOK,
+                Move.Kind.PAWN_PROMOTE_TO_BISHOP,
+                Move.Kind.PAWN_PROMOTE_TO_KNIGHT
+            ),
+            pawnC7Moves.stream().map(Move::getMoveKind).collect(Collectors.toSet())
+        );
+        Assertions.assertEquals(Set.of(Square.C(8)), pawnC7Moves.stream().map(Move::getTo).collect(Collectors.toSet()));
     }
 }

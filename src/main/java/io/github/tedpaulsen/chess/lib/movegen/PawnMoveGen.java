@@ -2,9 +2,11 @@ package io.github.tedpaulsen.chess.lib.movegen;
 
 import io.github.tedpaulsen.chess.lib.BitBoard;
 import io.github.tedpaulsen.chess.lib.BoardRepresentation;
+import io.github.tedpaulsen.chess.lib.Masks;
 import io.github.tedpaulsen.chess.lib.Move;
 import io.github.tedpaulsen.chess.lib.Side;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class PawnMoveGen implements MoveGen {
@@ -21,76 +23,98 @@ public class PawnMoveGen implements MoveGen {
         for (BitBoard pawn : pawns.toSingletons()) {
             if (side.is(Side.WHITE)) {
                 // advance
-                moves.add(new Move(pieceCode, pawn, pawn.shiftLeft(8).mask(empties)));
+                addMove(new Move(pieceCode, pawn, pawn.shiftLeft(8).mask(empties)), moves);
                 // left capture
-                moves.add(new Move(pieceCode, pawn, pawn.notAFile().shiftLeft(7).mask(enemyPieces)));
+                addMove(new Move(pieceCode, pawn, pawn.notAFile().shiftLeft(7).mask(enemyPieces)), moves);
                 // left en passant capture
-                moves.add(
+                addMove(
                     new Move(
                         pieceCode,
                         pawn,
                         pawn.notHFile().shiftLeft(7).mask(board.getEnPassantSquare()),
                         Move.Kind.EN_PASSANT_CAPTURE
-                    )
+                    ),
+                    moves
                 );
                 // right capture
-                moves.add(new Move(pieceCode, pawn, pawn.notHFile().shiftLeft(9).mask(enemyPieces)));
+                addMove(new Move(pieceCode, pawn, pawn.notHFile().shiftLeft(9).mask(enemyPieces)), moves);
                 // right en passant capture
-                moves.add(
+                addMove(
                     new Move(
                         pieceCode,
                         pawn,
                         pawn.notHFile().shiftLeft(9).mask(board.getEnPassantSquare()),
                         Move.Kind.EN_PASSANT_CAPTURE
-                    )
+                    ),
+                    moves
                 );
                 // double advance
-                moves.add(
+                addMove(
                     new Move(
                         pieceCode,
                         pawn,
                         pawn.rank2().shiftLeft(8).mask(empties).shiftLeft(8).mask(empties),
                         Move.Kind.PAWN_DOUBLE_ADVANCE
-                    )
+                    ),
+                    moves
                 );
             } else {
                 // advance
-                moves.add(new Move(pieceCode, pawn, pawn.shiftRight(8).mask(empties)));
+                addMove(new Move(pieceCode, pawn, pawn.shiftRight(8).mask(empties)), moves);
                 // left capture
-                moves.add(new Move(pieceCode, pawn, pawn.notHFile().shiftRight(7).mask(enemyPieces)));
+                addMove(new Move(pieceCode, pawn, pawn.notHFile().shiftRight(7).mask(enemyPieces)), moves);
                 // left en passant capture
-                moves.add(
+                addMove(
                     new Move(
                         pieceCode,
                         pawn,
                         pawn.notHFile().shiftRight(7).mask(board.getEnPassantSquare()),
                         Move.Kind.EN_PASSANT_CAPTURE
-                    )
+                    ),
+                    moves
                 );
                 // right capture
-                moves.add(new Move(pieceCode, pawn, pawn.notAFile().shiftRight(9).mask(enemyPieces)));
+                addMove(new Move(pieceCode, pawn, pawn.notAFile().shiftRight(9).mask(enemyPieces)), moves);
                 // right en passant capture
-                moves.add(
+                addMove(
                     new Move(
                         pieceCode,
                         pawn,
                         pawn.notAFile().shiftRight(9).mask(board.getEnPassantSquare()),
                         Move.Kind.EN_PASSANT_CAPTURE
-                    )
+                    ),
+                    moves
                 );
                 // double advance
-                moves.add(
+                addMove(
                     new Move(
                         pieceCode,
                         pawn,
                         pawn.rank7().shiftRight(8).mask(empties).shiftRight(8).mask(empties),
                         Move.Kind.PAWN_DOUBLE_ADVANCE
-                    )
+                    ),
+                    moves
                 );
             }
         }
 
-        return moves.stream().filter(m -> !m.getTo().isEmpty()).toList();
+        return moves;
+    }
+
+    private void addMove(Move moveToAdd, Collection<Move> moves) {
+        if (moveToAdd.getTo().isEmpty()) {
+            return;
+        }
+
+        if (!moveToAdd.getTo().intersect(Masks.RANK_8 | Masks.RANK_1).isEmpty()) {
+            // promoting a pawn actually results in 4 possible moves depending on promotion choice
+            moves.add(moveToAdd.toBuilder().moveKind(Move.Kind.PAWN_PROMOTE_TO_QUEEN).build());
+            moves.add(moveToAdd.toBuilder().moveKind(Move.Kind.PAWN_PROMOTE_TO_ROOK).build());
+            moves.add(moveToAdd.toBuilder().moveKind(Move.Kind.PAWN_PROMOTE_TO_BISHOP).build());
+            moves.add(moveToAdd.toBuilder().moveKind(Move.Kind.PAWN_PROMOTE_TO_KNIGHT).build());
+        } else {
+            moves.add(moveToAdd);
+        }
     }
 
     @Override
